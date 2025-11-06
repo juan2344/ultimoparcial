@@ -31,7 +31,7 @@
 
 
     <footer>
-        <p>Creado por Gabriel Gonzalez – 2025</p>
+        <p>Creado por Juan pablo Garzon - Kevin Villegas – 2025</p>
     </footer>
 </body>
 

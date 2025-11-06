@@ -1,23 +1,40 @@
 <?php
 session_start();
 
-require_once './config/bd.php';
+require_once __DIR__ . '/config/bd.php'; // define $mysqli (mysqli)
+
 if (!isset($_SESSION['usuario_id'])) {
-    header('location: register.view.php');
+    header('Location: register.view.php');
+    exit;
 }
 
+// Mensaje flash (opcional)
 $mensaje = '';
 if (isset($_SESSION['mensaje'])) {
     $mensaje = $_SESSION['mensaje'];
     unset($_SESSION['mensaje']);
 }
 
-$stmt = $conn->prepare('SELECT * FROM archivos WHERE usuario_id = ?');
-$stmt->bind_param('i', $_SESSION['usuario_id']);
+// Traer archivos del usuario logueado
+$usuarioId = (int)$_SESSION['usuario_id'];
+
+// Selecciona campos que existen en tu tabla `archivos`:
+// id, nombre_original, ruta, creado_en
+$stmt = $mysqli->prepare(
+    'SELECT id, nombre_original, ruta, creado_en
+     FROM archivos
+     WHERE usuario_id = ?
+     ORDER BY creado_en DESC'
+);
+if (!$stmt) {
+    die('Error preparando consulta: ' . $mysqli->error);
+}
+$stmt->bind_param('i', $usuarioId);
 $stmt->execute();
 $resul = $stmt->get_result();
 $stmt->close();
-$archivos = $resul->fetch_all(MYSQLI_ASSOC);
+
+$archivos = $resul ? $resul->fetch_all(MYSQLI_ASSOC) : [];
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -50,8 +67,7 @@ $archivos = $resul->fetch_all(MYSQLI_ASSOC);
         
         <nav>
             <ul>
-                <li><a href="#">Inicio</a></li>
-                <li><a href="#">Ayuda</a></li>
+                <li><a href="index.php>">Inicio</a></li>
             </ul>
         </nav>
     </header>
@@ -60,7 +76,7 @@ $archivos = $resul->fetch_all(MYSQLI_ASSOC);
     <form action="uploads.php" method="post" enctype="multipart/form-data">
         <?php if (!empty($mensaje)): ?>
             <div style="background-color: #d4edda; padding: 10px; border-radius: 5px; color: #155724; margin-bottom: 10px;">
-                <?= $mensaje ?>
+                <?= htmlspecialchars($mensaje) ?>
             </div>
         <?php endif; ?>
         <label for="envio">Subir nuevo documento</label><br>
@@ -82,15 +98,14 @@ $archivos = $resul->fetch_all(MYSQLI_ASSOC);
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($archivos as $key => $ar):
-                    ; ?>
-                    <?php $key = $key + 1;?>
-                    <?php $dato = $key%2==0 ? "rgba(204, 204, 204, 0.84)": "white"?>
-                    <tr style="background-color: <?php echo $dato?>;">
-                        <td> <?php echo $ar['nombre_original']; ?></td>
-                        <td> <?php echo $ar['fecha_subida']; ?></td>
-                        <td> <a href="<?php echo $ar['guardado']; ?>">Descargar</a></td>
-                        <td> <a href="<?php echo './delete.php?id=' . $ar['id']; ?>">Eliminar</a></td>
+                <?php foreach ($archivos as $key => $ar): ?>
+                    <?php $key = $key + 1; ?>
+                    <?php $dato = $key % 2 == 0 ? "rgba(204, 204, 204, 0.84)" : "white"; ?>
+                    <tr style="background-color: <?= htmlspecialchars($dato) ?>;">
+                        <td><?= htmlspecialchars($ar['nombre_original']) ?></td>
+                        <td><?= htmlspecialchars($ar['creado_en']) ?></td>
+                        <td><a href="<?= htmlspecialchars($ar['ruta']) ?>" target="_blank" rel="noopener">Descargar</a></td>
+                        <td><a href="<?= './delete.php?id=' . (int)$ar['id']; ?>" onclick="return confirm('¿Eliminar?')">Eliminar</a></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

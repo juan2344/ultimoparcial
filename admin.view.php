@@ -1,24 +1,41 @@
 <?php
-        require_once './config/bd.php';
-        session_start();
-        
-        if(isset($_SESSION['usuario_id'])){
-            $resul = $conn->query("SELECT
-            u.nombre,
-            u.correo,
-            a.nombre_original,
-            a.guardado,
-            DATE(a.fecha_subida) AS fecha_subida
-            FROM
-            usuarios AS u
-            INNER JOIN
-            archivos AS a ON a.usuario_id = u.id
-            WHERE
-            u.rol = 'estudiante';");
-            $datosEstudiantes = $resul->fetch_all(MYSQLI_ASSOC);
-        }
-?>
+require_once __DIR__ . '/config/bd.php'; // $mysqli (mysqli)
+session_start();
 
+/* 1) Validación de sesión y rol */
+if (!isset($_SESSION['usuario_id'])) {
+    header('Location: /login.view.php');
+    exit;
+}
+$rol = $_SESSION['rol'] ?? 'estudiante';
+if ($rol !== 'profesor') {
+    header('Location: /panel.view.php');
+    exit;
+}
+
+/* 2) Traer todos los archivos con datos del estudiante
+   — Esquema actual:
+     usuarios.email, archivos.ruta, archivos.creado_en
+*/
+$sql = "
+SELECT
+    u.nombre                           AS nombre,
+    u.email                            AS correo,
+    a.nombre_original                  AS nombre_original,
+    a.ruta                             AS ruta,
+    DATE(a.creado_en)                  AS fecha
+FROM usuarios AS u
+JOIN archivos  AS a ON a.usuario_id = u.id
+WHERE u.rol = 'estudiante'
+ORDER BY a.creado_en DESC
+";
+
+$res = $mysqli->query($sql);
+if ($res === false) {
+    die('Error en consulta: ' . $mysqli->error);
+}
+$datosEstudiantes = $res->fetch_all(MYSQLI_ASSOC);
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -64,21 +81,21 @@
                 <?php if (!empty($datosEstudiantes)): ?>
                     <?php foreach ($datosEstudiantes as $estudiante): ?>
                     <tr>
-                        <td><?php echo htmlspecialchars($estudiante['nombre'])?></td>
-                        <td><?php echo htmlspecialchars($estudiante['correo'])?></td>
+                        <td><?php echo htmlspecialchars($estudiante['nombre']); ?></td>
+                        <td><?php echo htmlspecialchars($estudiante['correo']); ?></td>
                         <td>
-                            <a href="<?php echo htmlspecialchars($estudiante['guardado'])?>">
-                                <?php echo htmlspecialchars($estudiante['nombre_original'])?>
+                            <a href="<?php echo htmlspecialchars($estudiante['ruta']); ?>" target="_blank" rel="noopener">
+                                <?php echo htmlspecialchars($estudiante['nombre_original']); ?>
                             </a>
                         </td>
-                        <td><?php echo htmlspecialchars($estudiante['fecha_subida'])?></td>
+                        <td><?php echo htmlspecialchars($estudiante['fecha']); ?></td>
                     </tr>
-                    <?php endforeach ?>
+                    <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
                         <td colspan="4" style="text-align:center;">No hay documentos disponibles</td>
                     </tr>
-                <?php endif ?>
+                <?php endif; ?>
             </tbody>
         </table>
     </main>
@@ -86,14 +103,10 @@
     <!-- 🔹 Scripts -->
     <script>
         // Filtro rápido
-        let rows = document.querySelectorAll("tbody tr");
-        console.log(rows);
         document.getElementById("buscador").addEventListener("keyup", function() {
-            let filter = this.value.toLowerCase();
-            let rows = document.querySelectorAll("tbody tr");
-            
-            rows.forEach(row => {
-                let text = row.innerText.toLowerCase();
+            const filter = this.value.toLowerCase();
+            document.querySelectorAll("tbody tr").forEach(row => {
+                const text = row.innerText.toLowerCase();
                 row.style.display = text.includes(filter) ? "" : "none";
             });
         });
@@ -102,12 +115,12 @@
         document.querySelectorAll("th").forEach((th, index) => {
             th.style.cursor = "pointer";
             th.addEventListener("click", () => {
-                let rows = Array.from(document.querySelectorAll("tbody tr"));
-                let asc = th.classList.toggle("asc");
+                const rows = Array.from(document.querySelectorAll("tbody tr"));
+                const asc = th.classList.toggle("asc");
 
                 rows.sort((a, b) => {
-                    let tdA = a.children[index].innerText.toLowerCase();
-                    let tdB = b.children[index].innerText.toLowerCase();
+                    const tdA = a.children[index].innerText.toLowerCase();
+                    const tdB = b.children[index].innerText.toLowerCase();
                     return asc ? tdA.localeCompare(tdB) : tdB.localeCompare(tdA);
                 });
 

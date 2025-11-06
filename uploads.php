@@ -1,58 +1,87 @@
 <?php
-    session_start();
-require_once('./config/bd.php');
+// uploads.php (versión mysqli)
+session_start();
+require_once __DIR__ . '/config/bd.php'; // aquí se define $mysqli (mysqli)
 
-$ruta = 'uploads/';
-
-
-//resivimos el archivo por el metodo post
-if ($_SERVER['REQUEST_METHOD'] === "POST") {
-    //se enruta a la carpeta de destino
-    $filename = $ruta . basename($_FILES['envio']['name']);
-
-    //se hace una verificacion del tamanio del archivo
-    if ($_FILES['envio']['size'] < 10000) {
-        $mensaje = '<div style=" background-color: rgba(194, 1, 1,0.5);color: #fff;width: 100%;height: 50px;"><h2>tamanio mayor 10mb.</h2></div>';
-        $_SESSION['mensaje'] = $mensaje;
-    }
-
-    //verificamos las extenciones que recibimos por que solo aceptamos pdf
-    if (pathinfo($_FILES['envio']['name'], PATHINFO_EXTENSION) == 'pdf') {
-        $mensaje = '<div><h2>documentos con extencion no requerida</h2></div>';
-        $_SESSION['mensaje'] = $mensaje;
-    }
-
-    //logica para recibir archivo
-    if (file_exists($filename)) {
-        $name = explode('.', $_FILES['envio']['name']);
-        $nuevoname = $ruta . $name[0] . "_" . $name[1];
-
-        if (move_uploaded_file($_FILES['envio']['tmp_name'], $nuevoname)) {
-            $mensaje = '<div style="background-color: rgba(1, 194, 33, 0.5);color: #fff;width: 100%;height: 50px;"><h2>archivo enviando exitosamente.</h2></div>';
-            $fecha = new DateTime('now',new DateTimeZone('America/Panama'));
-            $fecha1 = $fecha->format('Y-m-d');
-            $stmt = $conn->prepare('INSERT INTO archivos(nombre_original,guardado,usuario_id) values(?,?,?);');
-            $stmt->bind_param('sss',$_FILES['envio']['name'],$nuevoname,$_SESSION['usuario_id']);
-            $stmt->execute();
-            $stmt->close();
-            $_SESSION['mensaje'] = $mensaje;
-            header('location: panel.view.php');
-        }
-
-    } else {
-        if (move_uploaded_file($_FILES['envio']['tmp_name'], $filename)) {
-            $mensaje = '<h2>archivo enviando exitosamente.</h2>';
-            $stmt = $conn->prepare('INSERT INTO archivos(nombre_original,guardado,usuario_id) values(?,?,?);');
-            $stmt->bind_param('sss',$_FILES['envio']['name'],$filename,$_SESSION['usuario_id']);
-            $stmt->execute();
-            $stmt->close();
-
-            $_SESSION['mensaje'] = $mensaje;
-
-            header('location: panel.view.php');
-        }
-    }
-
+// Debe estar logueado
+if (!isset($_SESSION['usuario_id'])) {
+    $_SESSION['mensaje'] = 'Debes iniciar sesión.';
+    header('Location: /login.view.php');
+    exit;
 }
 
-?>
+// Acepta el archivo desde <input name="envio"> o <input name="archivo">
+$file = $_FILES['envio'] ?? ($_FILES['archivo'] ?? null);
+
+// Validar método y archivo
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !$file) {
+    $_SESSION['mensaje'] = 'Solicitud inválida.';
+    header('Location: /panel.view.php');
+    exit;
+}
+
+// Validar error de subida
+if ($file['error'] !== UPLOAD_ERR_OK) {
+    $map = [
+        UPLOAD_ERR_INI_SIZE   => 'El archivo excede upload_max_filesize.',
+        UPLOAD_ERR_FORM_SIZE  => 'El archivo excede el límite del formulario.',
+        UPLOAD_ERR_PARTIAL    => 'El archivo se subió parcialmente.',
+        UPLOAD_ERR_NO_FILE    => 'No se seleccionó archivo.',
+        UPLOAD_ERR_NO_TMP_DIR => 'Falta la carpeta temporal.',
+        UPLOAD_ERR_CANT_WRITE => 'No se pudo escribir en disco.',
+        UPLOAD_ERR_EXTENSION  => 'Una extensión detuvo la subida.'
+    ];
+    $_SESSION['mensaje'] = $map[$file['error']] ?? ('Error de subida: ' . $file['error']);
+    header('Location: /panel.view.php');
+    exit;
+}
+
+// Validar extensión
+$permitidos = ['pdf','doc','docx','xls','xlsx'];
+$nombreOriginal = $file['name'];
+$ext = strtolower(pathinfo($nombreOriginal, PATHINFO_EXTENSION));
+if (!in_array($ext, $permitidos, true)) {
+    $_SESSION['mensaje'] = 'documentos con extencion no requerida';
+    header('Location: /panel.view.php');
+    exit;
+}
+
+// Asegurar carpeta de destino
+$uploadsDirAbs = __DIR__ . '/uploads';
+if (!is_dir($uploadsDirAbs)) {
+    @mkdir($uploadsDirAbs, 0775, true);
+}
+
+// Generar nombre único y mover
+$nombreAlmacenado = uniqid('doc_', true) . '.' . $ext;
+$rutaRel = 'uploads/' . $nombreAlmacenado;    // lo que guardamos en BD
+$rutaAbs = $uploadsDirAbs . '/' . $nombreAlmacenado;
+
+if (!move_uploaded_file($file['tmp_name'], $rutaAbs)) {
+    $_SESSION['mensaje'] = 'No se pudo mover el archivo al destino.';
+    header('Location: /panel.view.php');
+    exit;
+}
+
+// Datos para BD
+$uid    = (int)$_SESSION['usuario_id'];
+$tipo   = $file['type'] ?? '';
+$tamano = (int)$file['size'];
+
+// INSERT acorde a tu tabla `archivos`
+// Si tu tabla es: usuario_id, nombre_original, nombre_almacenado, tipo, tamano, ruta
+$sql = 'INSERT INTO archivos (usuario_id, nombre_original, nombre_almacenado, tipo, tamano, ruta)
+        VALUES (?, ?, ?, ?, ?, ?)';
+$stmt = $mysqli->prepare($sql);
+if (!$stmt) {
+    $_SESSION['mensaje'] = 'Error preparando inserción: ' . $mysqli->error;
+    header('Location: /panel.view.php');
+    exit;
+}
+$stmt->bind_param('isssis', $uid, $nombreOriginal, $nombreAlmacenado, $tipo, $tamano, $rutaRel);
+$ok = $stmt->execute();
+$stmt->close();
+
+$_SESSION['mensaje'] = $ok ? 'Archivo subido correctamente.' : 'No se pudo registrar el archivo en la base de datos.';
+header('Location: /panel.view.php');
+exit;
