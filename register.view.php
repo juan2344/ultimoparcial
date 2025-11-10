@@ -61,42 +61,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro</title>
-    <link rel="stylesheet" href="./css/formulario.css">
-</head>
-<body>
 
-    <div class="contenedor">
-        <div class="imagen">
-            <img src="./img/freepik__the-style-is-candid-image-photography-with-natural__2573.png" alt="">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+</head>
+
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-200 text-gray-800">
+
+  <div
+    class="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl flex flex-col md:flex-row max-w-5xl w-full mx-6 overflow-hidden">
+
+    <div class="hidden md:flex md:w-1/2 bg-blue-600 items-center justify-center">
+      <img src="./img/freepik__the-style-is-candid-image-photography-with-natural__2573.png"
+        alt="Registro ilustración"
+        class="object-cover w-full h-full opacity-90" />
+    </div>
+
+    <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+      <h1 class="text-3xl font-bold text-blue-700 mb-2 text-center md:text-left">Crea tu cuenta</h1>
+      <p class="text-gray-600 mb-6 text-center md:text-left">
+        Únete a nuestra comunidad para acceder a tus tareas.
+      </p>
+
+      <form action="" method="post" class="space-y-5">
+
+        <div>
+          <label for="nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre completo:</label>
+          <input type="text" name="nombre" id="nombre" placeholder="Ej. Juan Pérez" required
+            class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition" />
         </div>
 
-        <form action="" method="post">
-            <div class="text">
-                <h1>Crea tu cuenta</h1>
-            </div>
-            <p>Únete a nuestra comunidad para acceder a tus tareas.</p>
+        <div>
+          <label for="correo" class="block text-sm font-medium text-gray-700 mb-1">Correo electrónico:</label>
+          <input type="email" name="correo" id="correo" placeholder="ejemplo@correo.com" required
+            class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition" />
+        </div>
 
-            <label for="nombre">Nombre completo:</label>
-            <input type="text" name="nombre" id="nombre" placeholder="Ej. Juan Pérez" required>
+        <div>
+          <label for="pass" class="block text-sm font-medium text-gray-700 mb-1">Contraseña:</label>
+          <div class="relative">
+            <input type="password" name="pass" id="pass" placeholder="Crea tu contraseña segura" required
+              class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition pr-10" />
 
-            <label for="correo">Correo electrónico:</label>
-            <input type="email" name="correo" id="correo" placeholder="ejemplo@correo.com" required>
+            <button type="button" id="togglePass"
+              class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-blue-600 focus:outline-none">
+              <i id="eyeIcon" class="ti ti-eye-off text-2xl"></i>
+            </button>
+          </div>
+        </div>
 
-            <label for="pass">Contraseña:</label>
-            <input type="password" name="pass" id="pass" placeholder="Crea tu contraseña segura" required>
+        <input type="submit" value="Registrarme"
+          class="w-full bg-green-600 text-white font-medium py-2.5 rounded-xl shadow-md hover:bg-green-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 cursor-pointer mt-4" />
 
-            <!-- Si tu UI necesita elegir rol, puedes añadir un select aquí con name="rol" -->
-
-            <input style="margin-top:30px;" type="submit" value="Registrarme">
-            <div class="text" style="text-aling:left;" >
-                <p>¿Ya tienes una cuenta? <a href="login.view.php">Inicia sesión aquí.</a></p>
-            </div>
-        </form>
-    </form>
+        <p class="text-center text-gray-600">
+          ¿Ya tienes una cuenta?
+          <a href="login.view.php" class="text-blue-600 font-medium hover:underline">
+            Inicia sesión aquí
+          </a>.
+        </p>
+      </form>
     </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="./js/toggle-password.js"></script>
 </body>
+
 </html>
