@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('docker-hub')
-        IMAGE_NAME = "dark093/gestor-php"        
+        IMAGE_NAME = "dark093/ultimoparcial"        
         BUILD_VERSION = "1.0.${env.BUILD_ID}"
     }
 
