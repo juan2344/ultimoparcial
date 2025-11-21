@@ -28,11 +28,11 @@ services:
     image: mariadb:latest
     container_name: gestor-db
     environment:
-      - MYSQL_ROOT_PASSWORD=rootpass
-      - MYSQL_DATABASE=gestor
-      - MYSQL_USER=gestoruser
-      - MYSQL_PASSWORD=gestorpass
-      - TZ=America/Bogota
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: gestor
+      MYSQL_USER: gestoruser
+      MYSQL_PASSWORD: gestorpass
+      TZ: America/Bogota
     volumes:
       - db_data:/var/lib/mysql
       - ./data/bd.sql:/docker-entrypoint-initdb.d/bd.sql
@@ -45,10 +45,10 @@ services:
     image: phpmyadmin:latest
     container_name: gestor-pma
     environment:
-      - PMA_HOST=db
-      - PMA_USER=gestoruser
-      - PMA_PASSWORD=gestorpass
-      - UPLOAD_LIMIT=100M
+      PMA_HOST: db
+      PMA_USER: gestoruser
+      PMA_PASSWORD: gestorpass
+      UPLOAD_LIMIT: 100M
     ports:
       - '8081:80'
     depends_on:
@@ -80,6 +80,4 @@ networks:
 
 volumes:
   db_data:
-    driver: local
   jenkins_data:
-    driver: local

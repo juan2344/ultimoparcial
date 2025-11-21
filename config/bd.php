@@ -1,5 +1,5 @@
 <?php
-$DB_HOST = 'localhost';          
+$DB_HOST = 'db';          
 $DB_PORT = 3306;          
 $DB_NAME = 'gestor';
 $DB_USER = 'gestoruser';
