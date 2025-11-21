@@ -1,6 +1,6 @@
 <?php
-$DB_HOST = 'db';          // nombre del servicio en docker-compose
-$DB_PORT = 3306;          // puerto interno del contenedor de MariaDB
+$DB_HOST = 'localhost';          
+$DB_PORT = 3306;          
 $DB_NAME = 'gestor';
 $DB_USER = 'gestoruser';
 $DB_PASS = 'gestorpass';
