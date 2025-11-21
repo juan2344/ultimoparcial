@@ -30,7 +30,6 @@ const config: Config = {
       {
         docs: {
           sidebarPath: require.resolve('./sidebars.ts'),
-          editUrl: 'https://github.com/juan2344/ultimoparcial/edit/main/',
         },
         blog: {
           showReadingTime: true,
@@ -52,6 +51,7 @@ const config: Config = {
     navbar: {
       title: 'Ultimo Parcial',
       logo: { alt: 'Ultimo Parcial Logo', src: '/img/logo.svg' },
+      style: 'dark',
       items: [
         { type: 'docSidebar', sidebarId: 'tutorialSidebar', position: 'left', label: 'Tutorial' },
         { href: 'https://github.com/juan2344/ultimoparcial', label: 'GitHub', position: 'right' },
