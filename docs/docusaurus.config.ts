@@ -6,7 +6,7 @@ import type * as Preset from '@docusaurus/preset-classic'
 const config: Config = {
   title: 'Ultimo Parcial',
   tagline: 'Proyecto de documentación',
-  favicon: 'img/favicon.ico',
+  favicon: '../img/favicon.ico',
 
   future: { v4: true },
 
@@ -29,7 +29,7 @@ const config: Config = {
       'classic',
       {
         docs: {
-          sidebarPath: './sidebars.ts',
+          sidebarPath: require.resolve('./sidebars.ts'),
           editUrl: 'https://github.com/juan2344/ultimoparcial/edit/main/',
         },
         blog: {
@@ -40,18 +40,18 @@ const config: Config = {
           onInlineAuthors: 'warn',
           onUntruncatedBlogPosts: 'warn',
         },
-        theme: { customCss: './src/css/custom.css' },
+        theme: { customCss: require.resolve('./src/css/custom.css') },
       } satisfies Preset.Options,
     ],
   ],
 
   // Configuración del tema
   themeConfig: {
-    image: '../img/docusaurus-social-card.jpg',
+    image: '/img/docusaurus-social-card.jpg',
     colorMode: { respectPrefersColorScheme: true },
     navbar: {
       title: 'Ultimo Parcial',
-      logo: { alt: 'Ultimo Parcial Logo', src: '../img/logo.svg' },
+      logo: { alt: 'Ultimo Parcial Logo', src: '/img/logo.svg' },
       items: [
         { type: 'docSidebar', sidebarId: 'tutorialSidebar', position: 'left', label: 'Tutorial' },
         { href: 'https://github.com/juan2344/ultimoparcial', label: 'GitHub', position: 'right' },

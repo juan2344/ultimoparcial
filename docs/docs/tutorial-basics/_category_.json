@@ -1,8 +1,8 @@
 {
-  "label": "Tutorial - Basics",
+  "label": "Tutorial",
   "position": 2,
   "link": {
     "type": "generated-index",
-    "description": "5 minutes to learn the most important Docusaurus concepts."
+    "description": "Aprende en 5 minutos los conceptos más importantes de la gestión de documentos académicos y cómo empezar con el proyecto."
   }
 }
