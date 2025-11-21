@@ -63,7 +63,7 @@ pipeline {
                 script {
                     echo "Construyendo imagen Docker PHP..."
                     sh """
-                        docker build -f .docker/Dockerfile \
+                        docker build \
                         --build-arg BUILD_VERSION=${BUILD_VERSION} \
                         -t ${IMAGE_NAME}:${BUILD_VERSION} .
                     """
