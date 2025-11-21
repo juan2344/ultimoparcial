@@ -46,13 +46,13 @@ Para usar Docker Hub directamente desde Jenkins, se recomienda crear una credenc
 - Usa este token al crear la credencial:
 
 ```
-dckr_pat_ihxQmbr7-YmipVWEimRcZR3km0s
+token dockerhub
 ```
 
-![Jenkins Add Credential](./img/jeckins-credential.png)  
+![Jenkins Add Credential](./img/jeckins-credential.png)
 _Pantalla de creación de la credencial con token de Docker Hub._
 
-![Jenkins Add Credential](./img/jeckins-credential-now.png)  
+![Jenkins Add Credential](./img/jeckins-credential-now.png)
 _Credencial creada y lista para usar en Jenkins._
 
 ---
@@ -62,3 +62,7 @@ _Credencial creada y lista para usar en Jenkins._
 - Siempre usa las credenciales de forma segura y evita incluir secretos directamente en los scripts de pipeline.
 - Utiliza IDs y descripciones claras para que las credenciales sean fáciles de identificar.
 - Para Docker Hub, utiliza **tokens en lugar de contraseñas**, para mayor seguridad.
+
+```
+
+```
