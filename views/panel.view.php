@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-require_once __DIR__ . '/config/bd.php'; // define $mysqli (mysqli)
+require_once __DIR__ . '/../config/bd.php';
 
 if (!isset($_SESSION['usuario_id'])) {
     header('Location: register.view.php');
@@ -18,17 +18,18 @@ if (isset($_SESSION['mensaje'])) {
 // Traer archivos del usuario logueado
 $usuarioId = (int)$_SESSION['usuario_id'];
 
-// Selecciona campos que existen en tu tabla `archivos`:
-// id, nombre_original, ruta, creado_en
+
 $stmt = $mysqli->prepare(
-    'SELECT id, nombre_original, ruta, creado_en
+    'SELECT id, nombre_original, guardado, fecha_subida
      FROM archivos
      WHERE usuario_id = ?
-     ORDER BY creado_en DESC'
+     ORDER BY fecha_subida DESC'
 );
+
 if (!$stmt) {
     die('Error preparando consulta: ' . $mysqli->error);
 }
+
 $stmt->bind_param('i', $usuarioId);
 $stmt->execute();
 $resul = $stmt->get_result();
@@ -56,7 +57,7 @@ $archivos = $resul ? $resul->fetch_all(MYSQLI_ASSOC) : [];
     </h1>
 
     <nav class="absolute right-6">
-      <a href="index.php"
+      <a href="../index.php"
         class="flex items-center gap-2 bg-red-600 text-white px-5 py-2.5 rounded-full font-medium shadow-md hover:bg-red-700 hover:shadow-lg transition text-sm sm:text-base">
         <i class="ti ti-logout text-base"></i>
         <span>Salir</span>
@@ -77,7 +78,7 @@ $archivos = $resul ? $resul->fetch_all(MYSQLI_ASSOC) : [];
         </div>
       <?php endif; ?>
 
-      <form action="uploads.php" method="post" enctype="multipart/form-data" class="space-y-5">
+      <form action="../controller/uploads.php" method="post" enctype="multipart/form-data" class="space-y-5">
         <div>
           <label for="envio" class="block text-gray-700 font-medium mb-1 text-sm sm:text-base">
             Selecciona un archivo:
@@ -113,10 +114,10 @@ $archivos = $resul ? $resul->fetch_all(MYSQLI_ASSOC) : [];
             <?php foreach ($archivos as $key => $ar): ?>
               <tr class="<?= $key % 2 == 0 ? 'bg-gray-50' : 'bg-white' ?> hover:bg-blue-50 transition">
                 <td class="px-4 sm:px-6 py-3 border-t border-gray-200 truncate"><?= htmlspecialchars($ar['nombre_original']) ?></td>
-                <td class="px-4 sm:px-6 py-3 border-t border-gray-200"><?= htmlspecialchars($ar['creado_en']) ?></td>
+                <td class="px-4 sm:px-6 py-3 border-t border-gray-200"><?= htmlspecialchars($ar['fecha_subida']) ?></td>
                 <td class="px-4 sm:px-6 py-3 border-t border-gray-200 text-center">
-                  <a href="<?= htmlspecialchars($ar['ruta']) ?>" target="_blank" rel="noopener"
-                    class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium transition">
+                 <a href="../controller/download.php?file=<?= urlencode($ar['guardado']) ?>" 
+                    class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium transition"
                     <i class="ti ti-download"></i> Descargar
                   </a>
                 </td>

@@ -1,58 +1,54 @@
 <?php
-// =================== LÓGICA DE LOGIN (mysqli) ===================
 session_start();
-require_once __DIR__ . '/config/bd.php'; // Aquí se define $mysqli (mysqli)
+require_once __DIR__ . '/../config/bd.php';
 
-// Si envían el formulario:
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // OJO: en tu formulario el input se llama "correo"
-    // pero en la BD el campo correcto (según el esquema que venimos usando) es "email".
-    $email    = trim($_POST['correo'] ?? '');   // viene del formulario
-    $password = $_POST['password'] ?? '';
+    $correo   = trim($_POST['correo'] ?? '');
+    $password = $_POST['password'] ?? ''; 
 
     // Validaciones básicas
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === '') {
-        // Si quieres, puedes guardar el error en sesión para mostrarlo en el HTML
-        // $_SESSION['error_login'] = 'Correo o contraseña inválidos.';
-        header('Location: /login.view.php');
+    if (!filter_var($correo, FILTER_VALIDATE_EMAIL) || $password === '') {
+        $_SESSION['mensaje'] = "Correo o contraseña inválidos";
+        header('Location: login.view.php');
         exit;
     }
 
-    // Buscar usuario por email en la tabla "usuarios"
-    // Si tu tabla tiene columnas: id, nombre, email, password_hash, rol
-    $stmt = $mysqli->prepare('SELECT id, email, password_hash, rol FROM usuarios WHERE email = ? LIMIT 1');
+    // Buscar usuario por correo
+    $stmt = $mysqli->prepare('SELECT id, nombre, email, password_hash, rol FROM usuarios WHERE email = ? LIMIT 1');
     if (!$stmt) {
-        // $_SESSION['error_login'] = 'Error preparando consulta.';
-        header('Location: /login.view.php');
+        $_SESSION['mensaje'] = "Error interno, intente nuevamente";
+        header('Location: login.view.php');
         exit;
     }
-    $stmt->bind_param('s', $email);
+
+    $stmt->bind_param('s', $correo);
     $stmt->execute();
     $res  = $stmt->get_result();
     $user = $res->fetch_assoc();
     $stmt->close();
 
     // Validar credenciales
-    if ($user && password_verify($password, $user['password_hash'])) {
+    if ($user && password_verify($password, $user['password_hash'])) { // CORREGIDO
         $_SESSION['usuario_id'] = (int)$user['id'];
-        $_SESSION['rol']        = ($user['rol'] === 'profesor') ? 'profesor' : 'estudiante';
+        $_SESSION['rol']        = ($user['rol'] === 'admin') ? 'admin' : 'estudiante';
+        $_SESSION['nombre']     = $user['nombre'];
 
         // Redirección según rol
         if ($_SESSION['rol'] === 'estudiante') {
-            header('Location: /panel.view.php');
-            exit;
+            header('Location: panel.view.php');
         } else {
-            header('Location: /admin.view.php');
-            exit;
+            header('Location: admin.view.php');
         }
+        exit;
     }
 
-    // Si falló login: redirige (puedes guardar un mensaje si quieres)
-    // $_SESSION['error_login'] = 'Correo o contraseña incorrectos.';
-    header('Location: /login.view.php');
+    // Si falla login
+    $_SESSION['mensaje'] = "Correo o contraseña incorrectos";
+    header('Location: login.view.php');
     exit;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -69,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl flex flex-col md:flex-row max-w-5xl w-full mx-6 overflow-hidden">
 
     <div class="hidden md:flex md:w-1/2 bg-blue-600 items-center justify-center">
-      <img src="./img/freepik__the-style-is-candid-image-photography-with-natural__2573.png"
+      <img src="../img/freepik__the-style-is-candid-image-photography-with-natural__2573.png"
         alt="Login ilustración"
         class="object-cover w-full h-full opacity-90" />
     </div>
@@ -109,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <p class="text-center text-gray-600">
           ¿No tienes una cuenta?
-          <a href="/register.view.php" class="text-blue-600 font-medium hover:underline">
+          <a href="./register.view.php" class="text-blue-600 font-medium hover:underline">
             Regístrate aquí
           </a>.
         </p>
@@ -119,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <script src="./js/toggle-password.js"></script>
+  <script src="../js/toggle-password.js"></script>
 </body>
 
 </html>

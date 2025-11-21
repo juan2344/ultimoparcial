@@ -40,13 +40,13 @@
         </p>
 
         <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start pt-2">
-          <a href="login.view.php"
+          <a href="./views/login.view.php"
             class="flex items-center justify-center gap-2 px-8 py-3 bg-blue-600 text-white font-medium rounded-full shadow-md hover:bg-blue-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300">
             <i class="ti ti-login"></i>
             Iniciar Sesión
           </a>
 
-          <a href="register.view.php"
+          <a href="./views/register.view.php"
             class="flex items-center justify-center gap-2 px-8 py-3 bg-green-600 text-white font-medium rounded-full shadow-md hover:bg-green-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300">
             <i class="ti ti-user-plus"></i>
             Registrarse

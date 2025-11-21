@@ -34,7 +34,8 @@ services:
       - MYSQL_PASSWORD=gestorpass
       - TZ=America/Bogota
     volumes:
-      - ./data/db:/var/lib/mysql
+      - db_data:/var/lib/mysql
+      - ./data/bd.sql:/docker-entrypoint-initdb.d/bd.sql
     ports:
       - '3307:3306'
     networks:
@@ -78,5 +79,7 @@ networks:
   gestor_net:
 
 volumes:
+  db_data:
+    driver: local
   jenkins_data:
     driver: local

@@ -1,63 +1,63 @@
 <?php
-// === LÓGICA (no cambia la parte visual) ===
-require_once __DIR__ . '/config/bd.php'; // usa $mysqli desde config/bd.php
+require_once __DIR__ . '/../config/bd.php';
 session_start();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Datos del formulario (mismos names del HTML: nombre, correo, pass)
-    $rol      = isset($_POST['rol']) ? $_POST['rol'] : 'estudiante';
+    // Captura de datos
+    $rol      = $_POST['rol'] ?? 'estudiante';
     $nombre   = trim($_POST['nombre'] ?? '');
     $correo   = trim($_POST['correo'] ?? '');
     $passPlan = $_POST['pass'] ?? '';
 
     // Validaciones mínimas
-    if ($nombre === '' || !filter_var($correo, FILTER_VALIDATE_EMAIL) || strlen($passPlan) < 6) {
-        // Si quieres, puedes guardar un mensaje en sesión y mostrarlo en la vista
+    if ($nombre === '' || strlen($nombre) > 100) {
+        $_SESSION['mensaje'] = "Nombre inválido";
+        header('Location: register.view.php');
+        exit();
+    }
+    if (!filter_var($correo, FILTER_VALIDATE_EMAIL) || strlen($correo) > 100) {
+        $_SESSION['mensaje'] = "Correo inválido";
+        header('Location: register.view.php');
+        exit();
+    }
+    if (strlen($passPlan) < 6) {
+        $_SESSION['mensaje'] = "La contraseña debe tener al menos 6 caracteres";
         header('Location: register.view.php');
         exit();
     }
 
-    // 1) Verificar si ya existe ese correo
+    // Verificar si ya existe ese correo
     $stmt = $mysqli->prepare('SELECT id FROM usuarios WHERE email = ? LIMIT 1');
-    if (!$stmt) {
-        header('Location: register.view.php'); exit();
-    }
     $stmt->bind_param('s', $correo);
     $stmt->execute();
     $stmt->store_result();
     if ($stmt->num_rows > 0) {
-        // Ya existe ese correo
         $stmt->close();
+        $_SESSION['mensaje'] = "El correo ya está registrado";
         header('Location: register.view.php');
         exit();
     }
     $stmt->close();
 
-    // 2) Insertar usuario
-    $hash = password_hash($passPlan, PASSWORD_DEFAULT);
-
-    // OJO: estas columnas están pensadas para la tabla creada con:
-    // nombre, email, password_hash, rol
-    // Si tu tabla usa 'correo' y 'pass', cambia el INSERT por:
-    // INSERT INTO usuarios (nombre, correo, pass, rol) VALUES (?,?,?,?)
-    $sql  = 'INSERT INTO usuarios (nombre, email, password_hash, rol) VALUES (?,?,?,?)';
-    $stmt = $mysqli->prepare($sql);
-    if (!$stmt) {
-        header('Location: register.view.php'); exit();
-    }
-    $stmt->bind_param('ssss', $nombre, $correo, $hash, $rol);
+    // Insertar usuario
+    $passHash = password_hash($passPlan, PASSWORD_DEFAULT);
+    $stmt = $mysqli->prepare('INSERT INTO usuarios (nombre, email, password_hash, rol) VALUES (?,?,?,?)');
+    $stmt->bind_param('ssss', $nombre, $correo, $passHash, $rol);
     $stmt->execute();
     $nuevoId = $mysqli->insert_id;
     $stmt->close();
 
-    // 3) Crear sesión y redirigir al panel
+    // Crear sesión y redirigir
     $_SESSION['rol']        = $rol;
     $_SESSION['usuario_id'] = (int)$nuevoId;
+    $_SESSION['nombre']     = $nombre;
 
     header('Location: panel.view.php');
     exit();
 }
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     class="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl flex flex-col md:flex-row max-w-5xl w-full mx-6 overflow-hidden">
 
     <div class="hidden md:flex md:w-1/2 bg-blue-600 items-center justify-center">
-      <img src="./img/freepik__the-style-is-candid-image-photography-with-natural__2573.png"
+      <img src="../img/freepik__the-style-is-candid-image-photography-with-natural__2573.png"
         alt="Registro ilustración"
         class="object-cover w-full h-full opacity-90" />
     </div>
@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div>
           <label for="pass" class="block text-sm font-medium text-gray-700 mb-1">Contraseña:</label>
           <div class="relative">
-            <input type="password" name="pass" id="pass" placeholder="Crea tu contraseña segura" required
+            <input type="password" name="pass" id="password" placeholder="Crea tu contraseña segura" required
               class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition pr-10" />
 
             <button type="button" id="togglePass"
@@ -119,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <p class="text-center text-gray-600">
           ¿Ya tienes una cuenta?
-          <a href="login.view.php" class="text-blue-600 font-medium hover:underline">
+          <a href="./login.view.php" class="text-blue-600 font-medium hover:underline">
             Inicia sesión aquí
           </a>.
         </p>
@@ -129,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <script src="./js/toggle-password.js"></script>
+  <script src="../js/toggle-password.js"></script>
 </body>
 
 </html>

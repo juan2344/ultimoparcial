@@ -1,1 +1,10 @@
-ultimoparcial/data/db
+# Carpeta de datos de la base de datos (MariaDB)
+data/db/
+
+# Carpeta de archivos subidos
+uploads/
+
+# Archivos temporales, logs, caches de PHP o Docker
+*.log
+*.tmp
+*.swp

@@ -1,22 +1,18 @@
 <?php
-require_once __DIR__ . '/config/bd.php'; // $mysqli (mysqli)
+require_once __DIR__ . '/../config/bd.php';
 session_start();
 
-/* 1) Validación de sesión y rol */
 if (!isset($_SESSION['usuario_id'])) {
-    header('Location: /login.view.php');
+    header('Location: login.view.php');
     exit;
 }
 $rol = $_SESSION['rol'] ?? 'estudiante';
 if ($rol !== 'profesor') {
-    header('Location: /panel.view.php');
+    header('Location: panel.view.php');
     exit;
 }
 
-/* 2) Traer todos los archivos con datos del estudiante
-   — Esquema actual:
-     usuarios.email, archivos.ruta, archivos.creado_en
-*/
+
 $sql = "
 SELECT
     u.nombre                           AS nombre,
